@@ -1,9 +1,8 @@
 # 1. Usamos la imagen base de PHP
 FROM php:8.2-apache
 
-# 2. INSTALAMOS NODE.JS (Esto es lo que falta y causa el error)
-# Usamos la versión 18 que es muy estable para Laravel
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - \
+# 2. INSTALAMOS NODE.JS (Actualizado a v22 para que Vite no se queje)
+RUN curl -sL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
 # 3. Instalamos librerías del sistema y extensiones PHP para PostgreSQL
@@ -32,7 +31,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --no-dev --optimize-autoloader
 
 # 7. Instalamos dependencias de JS/CSS y compilamos
-# Ahora que ya instalamos Node en el paso 2, esto funcionará
+# Ahora sí funcionará porque tenemos Node 22
 RUN npm install
 RUN npm run build
 
