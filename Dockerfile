@@ -1,8 +1,6 @@
-# Usamos una imagen de PHP con Apache
 FROM php:8.2-apache
 
-# Instalamos extensiones necesarias para Laravel y PostgreSQL
-# Hemos añadido 'libpq-dev' y cambiado 'pdo_mysql' por 'pdo_pgsql'
+# 1. Instalamos librerías del sistema y extensiones de PHP para Postgre
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -13,26 +11,24 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && docker-php-ext-install pdo pdo_pgsql gd
 
-# Activamos el módulo rewrite de Apache
+# 2. CONFIGURACIÓN CRUCIAL: Apuntar Apache a la carpeta /public de Laravel
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 3. Activamos el módulo rewrite para que las rutas de Laravel funcionen
 RUN a2enmod rewrite
 
-# Copiamos los archivos del proyecto
+# 4. Copiamos los archivos y entramos a la carpeta
 COPY . /var/www/html
-
-# Establecemos el directorio de trabajo
 WORKDIR /var/www/html
 
-# Instalamos Composer
+# 5. Instalamos Composer y las dependencias de PHP
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Instalamos las dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Damos permisos a las carpetas de Laravel
+# 6. Damos permisos correctos a Laravel
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Exponemos el puerto
 EXPOSE 80
-
-# Comando para arrancar Apache
 CMD ["apache2-foreground"]
