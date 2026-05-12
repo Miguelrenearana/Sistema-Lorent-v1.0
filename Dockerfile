@@ -32,3 +32,13 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 80
 CMD ["apache2-foreground"]
+
+# 7. Instalamos dependencias de CSS/JS y compilamos (NPM)
+RUN npm install && npm run build
+
+# 8. Permisos para Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# --- ESTA ES LA PARTE QUE CAMBIA ---
+# Usamos una cadena de comandos: primero migra y luego arranca el servidor
+CMD sh -c "php artisan migrate --force && apache2-foreground"
