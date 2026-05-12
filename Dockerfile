@@ -31,7 +31,7 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80
-CMD ["apache2-foreground"]
+
 
 # 7. Instalamos dependencias de CSS/JS y compilamos (NPM)
 RUN npm install && npm run build
